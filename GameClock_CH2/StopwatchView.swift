@@ -1,5 +1,5 @@
 //
-//  Stopwatch.swift
+//  StopwatchView.swift
 //  GameClock_CH2
 //
 //  Created by Kennard M on 20/04/26.
@@ -7,39 +7,37 @@
 
 import SwiftUI
 
-struct StopWatch: View{
+struct StopwatchView: View {
     @State var time = 0.0
     @State var isRunning: Bool = false
     @State var timer: Timer?
-    
-    var body: some View{
-        VStack (){
-//            Text(String(format:"%.2f", time))
+
+    var body: some View {
+        VStack {
             Text(timeFormatter(second: time))
                 .font(.system(size: 64))
                 .monospacedDigit()
                 .padding()
-            
+
             HStack {
-                Button (action: {
+                Button(action: {
                     if isRunning {
                         stopTimer()
-                    }
-                    else {
-                        startTimer ()
+                    } else {
+                        startTimer()
                     }
                 }) {
-                    Image (systemName: isRunning ? "pause" : "play.fill")
+                    Image(systemName: isRunning ? "pause" : "play.fill")
                 }
                 .padding()
                 .background(isRunning ? .red : .green)
                 .foregroundStyle(.white)
                 .cornerRadius(10)
-                
-                Button (action: {
-                    resetTimer ()
+
+                Button(action: {
+                    resetTimer()
                 }) {
-                    Image (systemName: "arrow.trianglehead.counterclockwise")
+                    Image(systemName: "arrow.trianglehead.counterclockwise")
                 }
                 .padding()
                 .background(.blue)
@@ -48,34 +46,33 @@ struct StopWatch: View{
             }
         }
     }
-    
-    func startTimer () {
+
+    func startTimer() {
         isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true)
-        { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
             time += 0.01
         }
     }
-    
-    func stopTimer () {
+
+    func stopTimer() {
         isRunning = false
         timer?.invalidate()
     }
-    
-    func resetTimer () {
+
+    func resetTimer() {
         stopTimer()
         time = 0.00
     }
-    
-    func timeFormatter (second: Double) -> String {
+
+    func timeFormatter(second: Double) -> String {
         let minutes = Int(second / 60.0)
         let seconds = Int(second.truncatingRemainder(dividingBy: 60.0))
         let tenthsOfASecond = Int(second.truncatingRemainder(dividingBy: 1.0) * 100.0)
-        
-        return String(format: "%02d.%02d,%02d", Int(exactly: minutes)!, Int(exactly: seconds)!, Int(exactly: tenthsOfASecond)!)
+
+        return String(format: "%02d.%02d,%02d", minutes, seconds, tenthsOfASecond)
     }
 }
 
 #Preview {
-    StopWatch()
+    StopwatchView()
 }

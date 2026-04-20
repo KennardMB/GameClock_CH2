@@ -1,54 +1,48 @@
 //
-//  Rubiks.swift
+//  RubiksView.swift
 //  GameClock_CH2
 //
 //  Created by Kennard M on 20/04/26.
 //
 
-
 import SwiftUI
 
-
-struct Rubiks: View{
+struct RubiksView: View {
     @State var time = 0.0
     @State var isRunning: Bool = false
     @State var timer: Timer?
-    
-    var body: some View{
+
+    var body: some View {
         ZStack {
             HStack {
-                Button (action: {
+                Button(action: {
                     if isRunning {
                         stopTimer()
-                    }
-                    else {
-                        startTimer ()
+                    } else {
+                        startTimer()
                     }
                 }) {
-                    Image (systemName: "hand.raised.fingers.spread")
+                    Image(systemName: "hand.raised.fingers.spread")
                         .font(.system(size: 100))
                         .frame(width: 550, height: 550)
-                    
                 }
                 .background(.yellow)
                 .foregroundStyle(.black)
                 .cornerRadius(500)
-                
+
                 Spacer()
-                
-                Button (action: {
+
+                Button(action: {
                     if isRunning {
                         stopTimer()
-                    }
-                    else {
-                        startTimer ()
+                    } else {
+                        startTimer()
                     }
                 }) {
-                    Image (systemName: "hand.raised.fingers.spread")
+                    Image(systemName: "hand.raised.fingers.spread")
                         .scaleEffect(x: -1, y: 1)
                         .font(.system(size: 100))
                         .frame(width: 550, height: 550)
-                    
                 }
                 .background(.yellow)
                 .foregroundStyle(.black)
@@ -56,76 +50,71 @@ struct Rubiks: View{
                 .contentShape(Circle())
             }
             .frame(alignment: .leading)
-            
-            VStack (spacing: 20){
+
+            VStack(spacing: 20) {
                 VStack {
-                    Text ("Rubiks Timer")
+                    Text("Rubiks Timer")
                         .font(.largeTitle)
-                    
+
                     Text(timeFormatter(second: time))
                         .font(.system(size: 64))
                         .monospacedDigit()
                         .padding()
                 }
 
-                HStack() {
-                    Button (action: {
-                        resetTimer ()
+                HStack {
+                    Button(action: {
+                        resetTimer()
                     }) {
-                        Image (systemName: "info.circle")
+                        Image(systemName: "info.circle")
                             .resizable(resizingMode: .stretch)
                             .padding(10)
                             .frame(width: 50, height: 50)
                     }
                     .buttonStyle(.glass)
-                    
-                    Button (action: {
-                        resetTimer ()
-                    }) {
-                        Image (systemName: "book")
-                            .resizable(resizingMode: .stretch)
-                            .padding(10)
-                            .frame(width: 50, height: 50)
-                    }
-                    .buttonStyle(.glass)
-                    
-                }
-                
-            }
-//            .background(Color.black.opacity(0.2))
-            .allowsHitTesting(false)
 
+                    Button(action: {
+                        resetTimer()
+                    }) {
+                        Image(systemName: "book")
+                            .resizable(resizingMode: .stretch)
+                            .padding(10)
+                            .frame(width: 50, height: 50)
+                    }
+                    .buttonStyle(.glass)
+                }
+            }
+            //            .background(Color.black.opacity(0.2))
+            .allowsHitTesting(false)
         }
-        
     }
-    
-    func startTimer () {
+
+    func startTimer() {
         isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true)
-        { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
             time += 0.01
         }
     }
-    
-    func stopTimer () {
+
+    func stopTimer() {
         isRunning = false
         timer?.invalidate()
     }
-    
-    func resetTimer () {
+
+    func resetTimer() {
         stopTimer()
         time = 0.00
     }
-    
-    func timeFormatter (second: Double) -> String {
+
+    func timeFormatter(second: Double) -> String {
         let minutes = Int(second / 60.0)
         let seconds = Int(second.truncatingRemainder(dividingBy: 60.0))
         let tenthsOfASecond = Int(second.truncatingRemainder(dividingBy: 1.0) * 100.0)
-        
-        return String(format: "%02d.%02d,%02d", Int(exactly: minutes)!, Int(exactly: seconds)!, Int(exactly: tenthsOfASecond)!)
+
+        return String(format: "%02d.%02d,%02d", minutes, seconds, tenthsOfASecond)
     }
 }
 
-#Preview (traits: .landscapeRight) {
-    Rubiks()
+#Preview(traits: .landscapeRight) {
+    RubiksView()
 }
