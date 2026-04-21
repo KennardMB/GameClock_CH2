@@ -11,7 +11,7 @@ struct RubiksView: View {
     @State var time = 0.0
     @State var isRunning: Bool = false
     @State var timer: Timer?
-
+    
     var body: some View {
         ZStack {
             HStack {
@@ -29,9 +29,9 @@ struct RubiksView: View {
                 .background(.yellow)
                 .foregroundStyle(.black)
                 .cornerRadius(500)
-
+                
                 Spacer()
-
+                
                 Button(action: {
                     if isRunning {
                         stopTimer()
@@ -50,18 +50,27 @@ struct RubiksView: View {
                 .contentShape(Circle())
             }
             .frame(alignment: .leading)
-
-            VStack(spacing: 20) {
-                VStack {
-                    Text("Rubiks Timer")
-                        .font(.largeTitle)
-
-                    Text(timeFormatter(second: time))
-                        .font(.system(size: 64))
-                        .monospacedDigit()
-                        .padding()
+            .overlay(alignment: .center) {
+                VStack(spacing: 20) {
+                    VStack {
+                        Text("Rubiks Timer")
+                            .font(.largeTitle)
+                        
+                        Text(timeFormatter(second: time))
+                            .font(.system(size: 64))
+                            .monospacedDigit()
+                            .padding()
+                    }
                 }
-
+                .allowsHitTesting(false)
+            }
+            
+            
+            VStack {
+                Spacer()
+            }
+            .background(Color.blue.opacity(0.6))
+            .safeAreaInset(edge: .bottom) {
                 HStack {
                     Button(action: {
                         resetTimer()
@@ -72,7 +81,7 @@ struct RubiksView: View {
                             .frame(width: 50, height: 50)
                     }
                     .buttonStyle(.glass)
-
+                    
                     Button(action: {
                         resetTimer()
                     }) {
@@ -84,33 +93,34 @@ struct RubiksView: View {
                     .buttonStyle(.glass)
                 }
             }
-            //            .background(Color.black.opacity(0.2))
-            .allowsHitTesting(false)
+            
         }
+        //             .background(Color.black.opacity(0.2))
+        //            .allowsHitTesting(false)
     }
-
+    
     func startTimer() {
         isRunning = true
         timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
             time += 0.01
         }
     }
-
+    
     func stopTimer() {
         isRunning = false
         timer?.invalidate()
     }
-
+    
     func resetTimer() {
         stopTimer()
         time = 0.00
     }
-
+    
     func timeFormatter(second: Double) -> String {
         let minutes = Int(second / 60.0)
         let seconds = Int(second.truncatingRemainder(dividingBy: 60.0))
         let tenthsOfASecond = Int(second.truncatingRemainder(dividingBy: 1.0) * 100.0)
-
+        
         return String(format: "%02d.%02d,%02d", minutes, seconds, tenthsOfASecond)
     }
 }

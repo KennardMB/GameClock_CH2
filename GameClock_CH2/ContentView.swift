@@ -18,7 +18,7 @@ struct ContentView: View {
                     Text(option).tag(option)
                 }
             }
-            .pickerStyle(.segmented)  // Converts picker to segmented control
+            .pickerStyle(.segmented)  //change the picker to be segmented
             .padding()
             
             if selection == "Stopwatch" {

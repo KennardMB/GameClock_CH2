@@ -74,6 +74,7 @@ struct ChessView: View {
             }
         }
         .padding()
+        .background(.black.opacity(0.1))
     }
 
     func startTimer() {
