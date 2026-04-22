@@ -53,7 +53,10 @@ struct ChessView: View {
                 VStack(spacing: 70) {
                     if isButtonsExpanded {
                         Button(action: {
-                            resetTimer()
+                            withAnimation{
+                                resetTimer()
+                                isButtonsExpanded = false
+                            }
                         }) {
                             Image(systemName: "stop.fill")
                                 .font(.system(size: 30))
