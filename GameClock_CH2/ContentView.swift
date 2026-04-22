@@ -30,24 +30,28 @@ struct ContentView: View {
 
                 Spacer()
 
-                HStack {
+                VStack (spacing: 20) {
                     NavigationLink("Rubik's") {
                         RubiksView()
                     }
                     .buttonStyle(.bordered)
+                    .glassEffect()
 
                     NavigationLink("Chess") {
                         ChessView()
                     }
                     .buttonStyle(.bordered)
+                    .glassEffect()
 
                     Button("Soon...") { }
                         .buttonStyle(.bordered)
                         .disabled(true)
+                        .glassEffect()
 
                     Button("Soon...") { }
                         .buttonStyle(.bordered)
                         .disabled(true)
+                    
                 }
                 .padding()
             }

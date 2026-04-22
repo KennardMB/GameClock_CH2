@@ -60,86 +60,35 @@ struct RubiksView: View {
             .onChange(of: leftPressed) { _, _ in updateLogic() }
             .onChange(of: rightPressed) { _, _ in updateLogic() }
             
-            //            Hand Buttons (Old code)
-            //            HStack {
-            //                Button(action: {
-            //                    if isRunning {
-            //                        stopTimer()
-            //                    } else {
-            //                        startTimer()
-            //                    }
-            //                }) {
-            //                    Image(systemName: "hand.raised.fingers.spread")
-            //                        .font(.system(size: 100))
-            //                        .frame(width: 550, height: 550)
-            //                }
-            //                .background(.yellow)
-            //                .foregroundStyle(.black)
-            //                .cornerRadius(500)
-            //
-            //
-            //                Spacer()
-            //
-            //                Button(action: {
-            //                    if isRunning {
-            //                        stopTimer()
-            //                    } else {
-            //                        startTimer()
-            //                    }
-            //                }) {
-            //                    Image(systemName: "hand.raised.fingers.spread")
-            //                        .scaleEffect(x: -1, y: 1)
-            //                        .font(.system(size: 100))
-            //                        .frame(width: 550, height: 550)
-            //                }
-            //                .background(.yellow)
-            //                .foregroundStyle(.black)
-            //                .cornerRadius(500)
-            //                .contentShape(Circle())
-            //
-            //            }
-            //            .frame(alignment: .leading)
-            //            .overlay(alignment: .center) {
-            //                VStack(spacing: 20) {
-            //                    VStack {
-            //                        Text("Rubiks Timer")
-            //                            .font(.largeTitle)
-            //
-            //                        Text(timeFormatter(second: time))
-            //                            .font(.system(size: 64))
-            //                            .monospacedDigit()
-            //                            .padding()
-            //                    }
-            //                }
-            //                .allowsHitTesting(false)
-            //            }
-            
             // Info and History Button
             GeometryReader { geometry in
-                HStack {
-                    Button(action: {
+                if  (currentState != .running) {
+                    HStack {
+                        Button(action: {
+                            
+                        }) {
+                            Image(systemName: "info.circle")
+                                .resizable(resizingMode: .stretch)
+                                .padding(10)
+                                .frame(width: 50, height: 50)
+                        }
+                        .buttonStyle(.glass)
                         
-                    }) {
-                        Image(systemName: "info.circle")
-                            .resizable(resizingMode: .stretch)
-                            .padding(10)
-                            .frame(width: 50, height: 50)
+                        Button(action: {
+                            
+                        }) {
+                            Image(systemName: "book")
+                                .resizable(resizingMode: .stretch)
+                                .padding(10)
+                                .frame(width: 50, height: 50)
+                        }
+                        .buttonStyle(.glass)
                     }
-                    .buttonStyle(.glass)
-                    
-                    Button(action: {
-                        
-                    }) {
-                        Image(systemName: "book")
-                            .resizable(resizingMode: .stretch)
-                            .padding(10)
-                            .frame(width: 50, height: 50)
-                    }
-                    .buttonStyle(.glass)
+                    .offset(y: geometry.size.height * 0.4)
+                    .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 }
-                .offset(y: geometry.size.height * 0.4)
-                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
             }
+            
         }
         .onAppear {
             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
@@ -189,7 +138,6 @@ struct RubiksView: View {
     }
     
     // MARK: - UI Helpers
-    
     private var statusMessage: String {
         switch currentState {
         case .idle: return "PLACE BOTH PALMS"
@@ -200,7 +148,7 @@ struct RubiksView: View {
     }
     
     private var timerTextColor: Color {
-        if currentState == .ready { return .green }
+        if currentState == .ready { return .yellow }
         if currentState == .finished { return .red }
         return .primary
     }
@@ -217,33 +165,6 @@ struct RubiksView: View {
         return String(format: "%01d:%02d.%02d", mins, secs, hunds)
     }
 }
-
-// old code
-//    func startTimer() {
-//        isRunning = true
-//        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
-//            time += 0.01
-//        }
-//    }
-//
-//    func stopTimer() {
-//        isRunning = false
-//        timer?.invalidate()
-//    }
-//
-//    func resetTimer() {
-//        stopTimer()
-//        time = 0.00
-//    }
-//
-//    func timeFormatter(second: Double) -> String {
-//        let minutes = Int(second / 60.0)
-//        let seconds = Int(second.truncatingRemainder(dividingBy: 60.0))
-//        let tenthsOfASecond = Int(second.truncatingRemainder(dividingBy: 1.0) * 100.0)
-//
-//        return String(format: "%02d.%02d,%02d", minutes, seconds, tenthsOfASecond)
-//    }
-//}
 
 
 // Custom Sensor remains the same for instant touch detection

@@ -8,70 +8,88 @@
 import SwiftUI
 
 struct StopwatchView: View {
+    
+    @State private var startTime = Date()
+    @State private var finalTime: TimeInterval = 0
+    @State private var displayTime: String = "00.00.00"
+    @State private var isRunning: Bool = false
+    @State private var timer: Timer? = nil
+    
     @State var time = 0.0
-    @State var isRunning: Bool = false
-    @State var timer: Timer?
-
+   
+    
     var body: some View {
         VStack {
-            Text(timeFormatter(second: time))
+            Text(displayTime)
                 .font(.system(size: 64))
-                .monospacedDigit()
+                .fontWeight(.thin)
                 .padding()
-
-            HStack {
+            
+            HStack (spacing: 100){
                 Button(action: {
                     if isRunning {
-                        stopTimer()
+                        pause()
                     } else {
-                        startTimer()
+                        start()
                     }
                 }) {
                     Image(systemName: isRunning ? "pause" : "play.fill")
                 }
+                .frame(width: 50, height: 50)
                 .padding()
                 .background(isRunning ? .red : .green)
                 .foregroundStyle(.white)
-                .cornerRadius(10)
-
+                .clipShape(Circle())
+                
                 Button(action: {
-                    resetTimer()
+                    reset()
                 }) {
                     Image(systemName: "arrow.trianglehead.counterclockwise")
                 }
+                .frame(width: 50, height: 50)
                 .padding()
                 .background(.blue)
                 .foregroundStyle(.white)
-                .cornerRadius(10)
+                .clipShape(Circle())
             }
         }
     }
+    
+    func start() {
+            startTime = Date()
+            isRunning = true
 
-    func startTimer() {
-        isRunning = true
-        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
-            time += 0.01
+            timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
+                formatTime()
+            }
         }
-    }
 
-    func stopTimer() {
-        isRunning = false
-        timer?.invalidate()
-    }
+        func pause() {
+            finalTime += Date().timeIntervalSince(startTime)
+            
+            timer?.invalidate()
+            isRunning = false
+        }
 
-    func resetTimer() {
-        stopTimer()
-        time = 0.00
-    }
+        func reset() {
+            timer?.invalidate()
+            finalTime = 0
+            isRunning = false
+            displayTime = "00:00.00"
+        }
 
-    func timeFormatter(second: Double) -> String {
-        let minutes = Int(second / 60.0)
-        let seconds = Int(second.truncatingRemainder(dividingBy: 60.0))
-        let tenthsOfASecond = Int(second.truncatingRemainder(dividingBy: 1.0) * 100.0)
+        func formatTime() {
+            let totalElapsed = isRunning ? finalTime + Date().timeIntervalSince(startTime) : finalTime
+            
+            let minutes = Int(totalElapsed) / 60
+            let seconds = Int(totalElapsed) % 60
+            let tenths = Int((totalElapsed * 100).truncatingRemainder(dividingBy: 100))
+            
+            displayTime = String(format: "%02d:%02d.%02d", minutes, seconds, tenths)
+        }
 
-        return String(format: "%02d.%02d,%02d", minutes, seconds, tenthsOfASecond)
-    }
 }
+
 
 #Preview {
     StopwatchView()
