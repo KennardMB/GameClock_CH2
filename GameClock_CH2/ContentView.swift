@@ -30,32 +30,54 @@ struct ContentView: View {
 
                 Spacer()
 
-                VStack (spacing: 20) {
-                    NavigationLink("Rubik's") {
-                        RubiksView()
-                    }
-                    .buttonStyle(.bordered)
-                    .glassEffect()
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Games")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                        .padding(.horizontal, 4)
 
-                    NavigationLink("Chess") {
-                        ChessView()
-                    }
-                    .buttonStyle(.bordered)
-                    .glassEffect()
-
-                    Button("Soon...") { }
+                    HStack(spacing: 20) {
+                        NavigationLink {
+                            RubiksView()
+                        } label: {
+                            VStack(spacing: 10) {
+                                Image(systemName: "cube.fill")
+                                    .font(.system(size: 44))
+                                    .symbolRenderingMode(.hierarchical)
+                                Text("Rubik's")
+                                    .font(.headline)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                        }
                         .buttonStyle(.bordered)
-                        .disabled(true)
+                        .tint(.blue)
                         .glassEffect()
 
-                    Button("Soon...") { }
+                        NavigationLink {
+                            ChessView()
+                        } label: {
+                            VStack(spacing: 10) {
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: 44))
+                                    .symbolRenderingMode(.hierarchical)
+                                Text("Chess")
+                                    .font(.headline)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 80)
+                        }
                         .buttonStyle(.bordered)
-                        .disabled(true)
-                    
+                        .tint(.purple)
+                        .glassEffect()
+                    }
                 }
                 .padding()
             }
             .frame(maxHeight: .infinity, alignment: .top)
+            .navigationTitle("Game Clock")
         }
     }
 }
