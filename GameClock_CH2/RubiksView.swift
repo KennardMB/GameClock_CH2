@@ -141,7 +141,16 @@ struct RubiksView: View {
                 .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
             }
         }
-            
+        .onAppear {
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
+            }
+        }
+        .onDisappear {
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
+            }
+        }
     }
     
     // MARK: - Core Logic
