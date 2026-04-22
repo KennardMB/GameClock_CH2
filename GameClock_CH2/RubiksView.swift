@@ -33,12 +33,14 @@ struct RubiksView: View {
                         // Left Palm
                         SensorView(isPressed: $leftPressed, color: sensorColor)
                             .frame (width: 400)
+                            .scaleEffect(x: -1, y: 1)
                             
                         Spacer()
                         
                         // Right Palm
                         SensorView(isPressed: $rightPressed, color: sensorColor)
                             .frame (width: 400)
+                        
                             
                     }
                     // Center Display
@@ -140,7 +142,7 @@ struct RubiksView: View {
     // MARK: - UI Helpers
     private var statusMessage: String {
         switch currentState {
-        case .idle: return "PLACE BOTH PALMS"
+        case .idle: return "PLACE BOTH INDEX FINGERS"
         case .ready: return "RELEASE TO START"
         case .running: return "TAP BOTH TO STOP"
         case .finished: return "SOLVE COMPLETE"
@@ -162,7 +164,7 @@ struct RubiksView: View {
         let mins = Int(seconds) / 60
         let secs = Int(seconds) % 60
         let hunds = Int((seconds.truncatingRemainder(dividingBy: 1)) * 100)
-        return String(format: "%01d:%02d.%02d", mins, secs, hunds)
+        return String(format: "%02d:%02d.%02d", mins, secs, hunds)
     }
 }
 
@@ -173,6 +175,7 @@ struct SensorView: View {
     var color: Color
     
     var body: some View {
+        ZStack {
             Circle()
                 .fill(isPressed ? color : color.opacity(0.15))
                 .frame(width: 800)
@@ -182,6 +185,7 @@ struct SensorView: View {
                         .onEnded { _ in isPressed = false }
                 )
                 .animation(.tightUpper, value: isPressed)
+        }
     }
 }
 

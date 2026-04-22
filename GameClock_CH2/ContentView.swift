@@ -78,6 +78,7 @@ struct ContentView: View {
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .navigationTitle("Game Clock")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
