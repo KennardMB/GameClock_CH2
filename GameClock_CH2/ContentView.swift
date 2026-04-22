@@ -10,24 +10,49 @@ import SwiftUI
 struct ContentView: View {
     @State private var selection = "Stopwatch"
     let options = ["Stopwatch", "Timer"]
-    
+
     var body: some View {
-        VStack {
-            Picker("Clock Type", selection: $selection) {
-                ForEach(options, id: \.self) { option in
-                    Text(option).tag(option)
+        NavigationStack {
+            VStack {
+                Picker("Clock Type", selection: $selection) {
+                    ForEach(options, id: \.self) { option in
+                        Text(option).tag(option)
+                    }
                 }
+                .pickerStyle(.segmented)  //change the picker to be segmented
+                .padding()
+
+                if selection == "Stopwatch" {
+                    StopwatchView()
+                } else {
+                    TimerView()
+                }
+
+                Spacer()
+
+                HStack {
+                    NavigationLink("Rubik's") {
+                        RubiksView()
+                    }
+                    .buttonStyle(.bordered)
+
+                    NavigationLink("Chess") {
+                        ChessView()
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button("Soon...") { }
+                        .buttonStyle(.bordered)
+                        .disabled(true)
+
+                    Button("Soon...") { }
+                        .buttonStyle(.bordered)
+                        .disabled(true)
+                }
+                .padding()
             }
-            .pickerStyle(.segmented)  //change the picker to be segmented
-            .padding()
-            
-            if selection == "Stopwatch" {
-                StopwatchView()
-            } else {
-                TimerView()
-            }
+            .frame(maxHeight: .infinity, alignment: .top)
         }
-        .frame(maxHeight: .infinity, alignment: .top)
     }
 }
 

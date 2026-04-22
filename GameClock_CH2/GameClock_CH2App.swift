@@ -11,7 +11,7 @@ import SwiftUI
 struct GameClock_CH2App: App {
     var body: some Scene {
         WindowGroup {
-            RubiksView()
+            ContentView()
         }
     }
 }
