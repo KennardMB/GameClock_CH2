@@ -28,8 +28,6 @@ struct ContentView: View {
                     TimerView()
                 }
 
-                Spacer()
-
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Games")
                         .font(.caption)
@@ -37,8 +35,7 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
                         .padding(.horizontal, 4)
-
-                    HStack(spacing: 20) {
+                    
                         NavigationLink {
                             RubiksView()
                         } label: {
@@ -72,13 +69,13 @@ struct ContentView: View {
                         .buttonStyle(.bordered)
                         .tint(.purple)
                         .glassEffect()
-                    }
+                    
                 }
                 .padding()
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .navigationTitle("Game Clock")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
         }
     }
 }

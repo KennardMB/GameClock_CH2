@@ -23,6 +23,10 @@ struct RubiksView: View {
     @State private var startTime = Date()
     @State private var finalTime: TimeInterval = 0
     
+    // Save / History function
+    @State private var history: [RubiksResult] = []
+    
+    
     
     var body: some View {
         ZStack{
@@ -67,9 +71,10 @@ struct RubiksView: View {
                 if  (currentState != .running) {
                     HStack {
                         Button(action: {
-                            
+                            finalTime = 0
+                            currentState = .idle
                         }) {
-                            Image(systemName: "info.circle")
+                            Image(systemName: "arrow.trianglehead.counterclockwise")
                                 .resizable(resizingMode: .stretch)
                                 .padding(10)
                                 .frame(width: 50, height: 50)
@@ -95,11 +100,14 @@ struct RubiksView: View {
         .onAppear {
             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                 scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
+                UIApplication.shared.isIdleTimerDisabled = true
             }
+            
         }
         .onDisappear {
             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                 scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
+                UIApplication.shared.isIdleTimerDisabled = false
             }
         }
     }
@@ -114,25 +122,33 @@ struct RubiksView: View {
         case .idle:
             if bothDown {
                 currentState = .ready
+                UIImpactFeedbackGenerator(style: .medium)
+                    .impactOccurred()
             }
             
         case .ready:
             if !bothDown {
-                // Step 3: One or both hands taken off -> Start instantly
                 startTime = Date()
                 currentState = .running
             }
             
         case .running:
             if bothDown {
-                // Step 4: Both hands on buttons -> Stop
                 finalTime = Date().timeIntervalSince(startTime)
                 currentState = .finished
+                let newResult = RubiksResult(rubiksTime: finalTime, date: Date())
+                
+                history.insert(newResult, at: 0)
+                // at: 0 means it puts it at the start of the array
+
+                
+                UIImpactFeedbackGenerator(style: .medium)
+                    .impactOccurred()
+                // for haptic feedback
+                
             }
             
         case .finished:
-            // Step 5: After stopping, wait until both hands are removed
-            // before allowing the next "Ready" state.
             if bothUp {
                 currentState = .idle
             }
@@ -169,7 +185,6 @@ struct RubiksView: View {
 }
 
 
-// Custom Sensor remains the same for instant touch detection
 struct SensorView: View {
     @Binding var isPressed: Bool
     var color: Color
@@ -179,6 +194,7 @@ struct SensorView: View {
             Circle()
                 .fill(isPressed ? color : color.opacity(0.15))
                 .frame(width: 800)
+                .edgesIgnoringSafeArea(.all)
                 .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { _ in if !isPressed { isPressed = true } }
