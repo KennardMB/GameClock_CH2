@@ -6,91 +6,111 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct StopwatchView: View {
-    
     @State private var startTime = Date()
-    @State private var finalTime: TimeInterval = 0
-    @State private var displayTime: String = "00.00.00"
-    @State private var isRunning: Bool = false
-    @State private var timer: Timer? = nil
-    
-    @State var time = 0.0
-   
-    
+    @State private var accumulated: TimeInterval = 0
+    @State private var isRunning = false
+
     var body: some View {
-        VStack {
-            Text(displayTime)
-                .font(.system(size: 64))
-                .fontWeight(.thin)
-                .padding()
-            
-            HStack (spacing: 100){
-                Button(action: {
-                    if isRunning {
-                        pause()
-                    } else {
-                        start()
-                    }
-                }) {
-                    Image(systemName: isRunning ? "pause" : "play.fill")
-                }
-                .frame(width: 50, height: 50)
-                .padding()
-                .background(isRunning ? .red : .green)
-                .foregroundStyle(.white)
-                .clipShape(Circle())
-                
-                Button(action: {
-                    reset()
-                }) {
-                    Image(systemName: "arrow.trianglehead.counterclockwise")
-                }
-                .frame(width: 50, height: 50)
-                .padding()
-                .background(.blue)
-                .foregroundStyle(.white)
-                .clipShape(Circle())
+        VStack(spacing: 0) {
+            Spacer()
+
+            TimelineView(.animation(paused: !isRunning)) { context in
+                let elapsed = isRunning
+                    ? accumulated + context.date.timeIntervalSince(startTime)
+                    : accumulated
+
+                Text(format(elapsed))
+                    .font(.system(size: 84, weight: .thin))
+                    .monospacedDigit()
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 16)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
             }
+
+            Spacer()
+
+            HStack {
+                CircleButton(
+                    title: "Reset",
+                    foreground: .primary,
+                    background: Color(.secondarySystemFill),
+                    stroke: Color(.separator)
+                ) {
+                    reset()
+                }
+                .opacity(accumulated == 0 && !isRunning ? 0.4 : 1)
+                .disabled(accumulated == 0 && !isRunning)
+
+                Spacer()
+
+                CircleButton(
+                    title: isRunning ? "Pause" : "Start",
+                    foreground: Palette.stopwatch,
+                    background: Palette.stopwatch.opacity(isRunning ? 0.25 : 0.18),
+                    stroke: Palette.stopwatch.opacity(0.5)
+                ) {
+                    isRunning ? pause() : start()
+                }
+            }
+            .padding(.horizontal, 40)
+            .padding(.bottom, 40)
         }
     }
-    
-    func start() {
-            startTime = Date()
-            isRunning = true
 
-            timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
-                formatTime()
-            }
-        }
+    private func start() {
+        startTime = Date()
+        isRunning = true
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
 
-        func pause() {
-            finalTime += Date().timeIntervalSince(startTime)
-            
-            timer?.invalidate()
-            isRunning = false
-        }
+    private func pause() {
+        accumulated += Date().timeIntervalSince(startTime)
+        isRunning = false
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
 
-        func reset() {
-            timer?.invalidate()
-            finalTime = 0
-            isRunning = false
-            displayTime = "00:00.00"
-        }
+    private func reset() {
+        isRunning = false
+        accumulated = 0
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+    }
 
-        func formatTime() {
-            let totalElapsed = isRunning ? finalTime + Date().timeIntervalSince(startTime) : finalTime
-            
-            let minutes = Int(totalElapsed) / 60
-            let seconds = Int(totalElapsed) % 60
-            let tenths = Int((totalElapsed * 100).truncatingRemainder(dividingBy: 100))
-            
-            displayTime = String(format: "%02d:%02d.%02d", minutes, seconds, tenths)
-        }
-
+    private func format(_ t: TimeInterval) -> String {
+        let minutes = Int(t) / 60
+        let seconds = Int(t) % 60
+        let hundredths = Int((t * 100).truncatingRemainder(dividingBy: 100))
+        return String(format: "%02d:%02d.%02d", minutes, seconds, hundredths)
+    }
 }
 
+private struct CircleButton: View {
+    let title: String
+    let foreground: Color
+    let background: Color
+    let stroke: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(foreground)
+                .frame(width: 80, height: 80)
+                .background(background, in: Circle())
+                .overlay(Circle().stroke(stroke, lineWidth: 2))
+        }
+        .buttonStyle(.plain)
+    }
+}
 
 #Preview {
-    StopwatchView()
+    NavigationStack {
+        StopwatchView()
+            .navigationTitle("Stopwatch")
+            .navigationBarTitleDisplayMode(.inline)
+    }
 }

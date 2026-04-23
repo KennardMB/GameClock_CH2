@@ -6,138 +6,210 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct RubiksView: View {
-    
-    // Cases
-    enum TimerState {
-        case idle, ready, running, finished
-    }
-    
-    // Presses
+    enum TimerState { case idle, ready, running, finished }
+
     @State private var leftPressed = false
     @State private var rightPressed = false
     @State private var currentState: TimerState = .idle
-    
-    // New Stopwatch Variables
     @State private var startTime = Date()
     @State private var finalTime: TimeInterval = 0
-    
-    
+    @State private var showInfo = false
+    @State private var celebrate = false
+    @State private var didBeatBest = false
+
+    @AppStorage("rubiks.bestTime") private var bestTime: Double = 0
+
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
-        ZStack{
-            TimelineView(.animation(minimumInterval: 0.01, paused: currentState != .running)) { context in
-                
-                ZStack {
-                    HStack(spacing: 0) {
-                        // Left Palm
-                        SensorView(isPressed: $leftPressed, color: sensorColor)
-                            .frame (width: 400)
-                            
-                        Spacer()
-                        
-                        // Right Palm
-                        SensorView(isPressed: $rightPressed, color: sensorColor)
-                            .frame (width: 400)
-                            
+        GeometryReader { geo in
+            ZStack {
+                Palette.ink.ignoresSafeArea()
+
+                TimelineView(.animation(minimumInterval: 0.01, paused: currentState != .running)) { ctx in
+                    let elapsed = (currentState == .running)
+                        ? ctx.date.timeIntervalSince(startTime)
+                        : finalTime
+
+                    ZStack {
+                        HStack(spacing: 0) {
+                            SensorPad(isPressed: $leftPressed, tint: sensorTint, diameter: geo.size.height * 1.4)
+                                .frame(width: geo.size.width * 0.5)
+                            SensorPad(isPressed: $rightPressed, tint: sensorTint, diameter: geo.size.height * 1.4)
+                                .frame(width: geo.size.width * 0.5)
+                        }
+
+                        VStack(spacing: 14) {
+                            Text(format(elapsed))
+                                .font(.system(size: 108, weight: .bold, design: .monospaced))
+                                .foregroundStyle(timerTextColor)
+                                .scaleEffect(celebrate ? 1.08 : 1.0)
+
+                            statusChip
+
+                            bottomChip
+                                .frame(height: 26)
+                        }
                     }
-                    // Center Display
-                    VStack(spacing: 20) {
-                        let currentDisplayTime = (currentState == .running) ? context.date.timeIntervalSince(startTime) : finalTime
-                        
-                        Text(formatTime(currentDisplayTime))
-                            .font(.system(size: 80, weight: .bold, design: .monospaced))
-                            .foregroundColor(timerTextColor)
-                        
-                        Text(statusMessage)
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                    }
-                    
+                }
+                .onChange(of: leftPressed) { _, _ in update() }
+                .onChange(of: rightPressed) { _, _ in update() }
+
+                if currentState != .running {
+                    topControls
                 }
             }
-            .ignoresSafeArea()
-            .onChange(of: leftPressed) { _, _ in updateLogic() }
-            .onChange(of: rightPressed) { _, _ in updateLogic() }
-            
-            // Info and History Button
-            GeometryReader { geometry in
-                if  (currentState != .running) {
-                    HStack {
-                        Button(action: {
-                            
-                        }) {
-                            Image(systemName: "info.circle")
-                                .resizable(resizingMode: .stretch)
-                                .padding(10)
-                                .frame(width: 50, height: 50)
-                        }
-                        .buttonStyle(.glass)
-                        
-                        Button(action: {
-                            
-                        }) {
-                            Image(systemName: "book")
-                                .resizable(resizingMode: .stretch)
-                                .padding(10)
-                                .frame(width: 50, height: 50)
-                        }
-                        .buttonStyle(.glass)
-                    }
-                    .offset(y: geometry.size.height * 0.4)
-                    .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+        }
+        .ignoresSafeArea()
+        .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showInfo) { infoSheet }
+        .onAppear { forceLandscape() }
+        .onDisappear { forcePortrait() }
+    }
+
+    private var topControls: some View {
+        VStack {
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.backward")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(Palette.paper)
+                        .frame(width: 44, height: 44)
                 }
+                .buttonStyle(.glass)
+
+                Spacer()
+
+                Button {
+                    showInfo = true
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.title3)
+                        .foregroundStyle(Palette.paper)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.glass)
             }
-            
-        }
-        .onAppear {
-            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
-            }
-        }
-        .onDisappear {
-            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
-            }
+            .padding(.horizontal, 24)
+            .padding(.top, 20)
+
+            Spacer()
         }
     }
-    
-    // MARK: - Core Logic
-    
-    private func updateLogic() {
+
+    private var statusChip: some View {
+        Text(statusMessage)
+            .font(.footnote.weight(.bold))
+            .tracking(2)
+            .foregroundStyle(statusColor)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
+            .background(statusColor.opacity(0.15), in: Capsule())
+            .overlay(Capsule().stroke(statusColor.opacity(0.3), lineWidth: 1))
+    }
+
+    @ViewBuilder
+    private var bottomChip: some View {
+        if didBeatBest && currentState == .finished {
+            Label("NEW BEST", systemImage: "trophy.fill")
+                .font(.footnote.weight(.bold))
+                .tracking(1.5)
+                .foregroundStyle(Palette.rubiks)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(Palette.rubiks.opacity(0.18), in: Capsule())
+        } else if bestTime > 0 && (currentState == .idle || currentState == .finished) {
+            Text("BEST  \(format(bestTime))")
+                .font(.footnote.weight(.semibold))
+                .tracking(1.5)
+                .foregroundStyle(Palette.chalk)
+        } else {
+            Color.clear
+        }
+    }
+
+    private var infoSheet: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("How it works")
+                .font(.title2.bold())
+
+            Label {
+                Text("Place both palms on the circular pads.")
+            } icon: {
+                Image(systemName: "hand.raised.fill").foregroundStyle(Palette.rubiks)
+            }
+            Label {
+                Text("Wait for them to turn teal, then release to start.")
+            } icon: {
+                Image(systemName: "timer").foregroundStyle(Palette.rubiks)
+            }
+            Label {
+                Text("Tap both pads again when you've solved the cube.")
+            } icon: {
+                Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.rubiks)
+            }
+
+            Button("Got it") { showInfo = false }
+                .buttonStyle(.borderedProminent)
+                .tint(Palette.rubiks)
+                .controlSize(.large)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 8)
+        }
+        .padding(24)
+        .presentationDetents([.medium])
+    }
+
+    private func update() {
         let bothDown = leftPressed && rightPressed
         let bothUp = !leftPressed && !rightPressed
-        
+
         switch currentState {
         case .idle:
             if bothDown {
                 currentState = .ready
+                didBeatBest = false
             }
-            
         case .ready:
             if !bothDown {
-                // Step 3: One or both hands taken off -> Start instantly
                 startTime = Date()
                 currentState = .running
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             }
-            
         case .running:
             if bothDown {
-                // Step 4: Both hands on buttons -> Stop
                 finalTime = Date().timeIntervalSince(startTime)
                 currentState = .finished
+                handleFinish()
             }
-            
         case .finished:
-            // Step 5: After stopping, wait until both hands are removed
-            // before allowing the next "Ready" state.
-            if bothUp {
-                currentState = .idle
+            if bothUp { currentState = .idle }
+        }
+    }
+
+    private func handleFinish() {
+        if bestTime == 0 || finalTime < bestTime {
+            bestTime = finalTime
+            didBeatBest = true
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } else {
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.55)) {
+            celebrate = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                celebrate = false
             }
         }
     }
-    
-    // MARK: - UI Helpers
+
     private var statusMessage: String {
         switch currentState {
         case .idle: return "PLACE BOTH PALMS"
@@ -146,52 +218,63 @@ struct RubiksView: View {
         case .finished: return "SOLVE COMPLETE"
         }
     }
-    
+
+    private var statusColor: Color {
+        switch currentState {
+        case .ready, .finished: return Palette.rubiks
+        default: return Palette.chalk
+        }
+    }
+
     private var timerTextColor: Color {
-        if currentState == .ready { return .yellow }
-        if currentState == .finished { return .red }
-        return .primary
+        switch currentState {
+        case .ready, .finished: return Palette.rubiks
+        case .running: return Palette.paper
+        case .idle: return Palette.paper.opacity(0.75)
+        }
     }
-    
-    private var sensorColor: Color {
-        if currentState == .ready { return .green }
-        return .yellow
+
+    private var sensorTint: Color {
+        currentState == .ready ? Palette.rubiks : Palette.paper
     }
-    
-    private func formatTime(_ seconds: Double) -> String {
+
+    private func format(_ seconds: Double) -> String {
         let mins = Int(seconds) / 60
         let secs = Int(seconds) % 60
         let hunds = Int((seconds.truncatingRemainder(dividingBy: 1)) * 100)
         return String(format: "%01d:%02d.%02d", mins, secs, hunds)
     }
-}
 
+    private func forceLandscape() {
+        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
+        }
+    }
 
-// Custom Sensor remains the same for instant touch detection
-struct SensorView: View {
-    @Binding var isPressed: Bool
-    var color: Color
-    
-    var body: some View {
-            Circle()
-                .fill(isPressed ? color : color.opacity(0.15))
-                .frame(width: 800)
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { _ in if !isPressed { isPressed = true } }
-                        .onEnded { _ in isPressed = false }
-                )
-                .animation(.tightUpper, value: isPressed)
+    private func forcePortrait() {
+        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
+        }
     }
 }
 
-extension Animation {
-    static let tightUpper = Animation.interactiveSpring(response: 0.5, dampingFraction: 0.8, blendDuration: 0.1)
+private struct SensorPad: View {
+    @Binding var isPressed: Bool
+    var tint: Color
+    var diameter: CGFloat
+
+    var body: some View {
+        Circle()
+            .fill(tint.opacity(isPressed ? 1.0 : 0.18))
+            .frame(width: diameter)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in if !isPressed { isPressed = true } }
+                    .onEnded { _ in isPressed = false }
+            )
+            .animation(.interactiveSpring(response: 0.5, dampingFraction: 0.8, blendDuration: 0.1), value: isPressed)
+    }
 }
-
-
-
-
 
 #Preview(traits: .landscapeRight) {
     RubiksView()
