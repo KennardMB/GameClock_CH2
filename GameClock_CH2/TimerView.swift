@@ -19,7 +19,7 @@ struct TimerView: View {
             if isRunning {
                 // Large Countdown Text
                 Text(formatTime(duration))
-                    .font(.system(size: 80, weight: .thin, design: .monospaced))
+                    .font(.system(size: 80, weight: .thin))
                     .transition(.opacity) // Smooth swap
             } else {
                 // Two-Column Picker
@@ -35,7 +35,7 @@ struct TimerView: View {
                     Text(isRunning ? "Running" : "Start")
                         .font(.system(size: 16, weight: .bold))
                         .frame(width: 80, height: 80)
-                        .background(isRunning ? Color.gray : Color.green)
+                        .background(isRunning || duration == 0 ? Color.gray : Color.green)
                         .foregroundColor(.white)
                         .clipShape(Circle())
                 }

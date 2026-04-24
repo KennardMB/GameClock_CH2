@@ -23,9 +23,6 @@ struct RubiksView: View {
     @State private var startTime = Date()
     @State private var finalTime: TimeInterval = 0
     
-    // Save / History function
-    @State private var history: [RubiksResult] = []
-    
     
     
     var body: some View {
@@ -47,27 +44,45 @@ struct RubiksView: View {
                         }
                         .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                         
+                        if currentState == .idle {
+                            HStack{
+                                Image(systemName: "hand.tap")
+                                    .font(.system(size: 50))
+                                    .scaleEffect(x:-1, y:1)
+                                    .offset(x: -300)
+                                    .opacity(0.3)
+                                Image(systemName: "hand.tap")
+                                    .font(.system(size: 50))
+                                    .offset(x: 300)
+                                    .opacity(0.3)
+                            }
+                            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                            .allowsHitTesting(false)
+                        }
+
+                        
                     }
                     // Center Display
                     VStack(spacing: 20) {
                         let currentDisplayTime = (currentState == .running) ? context.date.timeIntervalSince(startTime) : finalTime
                         
                         
-                        if currentState == .finished || (currentState == .idle && finalTime > 0)  {
-                            Text(formatTime(currentDisplayTime))
-                                .font(.system(size: 100, weight: .bold, design: .monospaced))
-                                .foregroundColor(timerTextColor)
-                        } else {
-                            Text(formatTime(currentDisplayTime))
-                                .font(.system(size: 80, weight: .light, design: .monospaced))
-                                .foregroundColor(timerTextColor)
-                        }
-                        
+                        let condition = currentState == .finished || (currentState == .idle && finalTime > 0)
+                        Text(formatTime(currentDisplayTime))
+                            .font(.system(
+                                size: condition ? 100: 80,
+                                weight: condition ? .bold : .light,
+                                design: .monospaced))
+                            .foregroundColor(timerTextColor)
+                        // if the condition is satisfied then it uses the animation
+                            .animation(condition ? .spring(response:0.1, dampingFraction: 0.9) : .none)
+                            .frame(width: 800, height: 100)
                         
                         Text(statusMessage)
                             .font(.headline)
                             .foregroundColor(.secondary)
                     }
+                    .multilineTextAlignment(.center)
                     .allowsHitTesting(false)
                     
                 }
@@ -85,9 +100,8 @@ struct RubiksView: View {
                             currentState = .idle
                         }) {
                             Image(systemName: "arrow.trianglehead.counterclockwise")
-                                .resizable(resizingMode: .stretch)
+                                .font(.system(size: 25))
                                 .padding(10)
-                                .frame(width: 50, height: 50)
                         }
                         .buttonStyle(.glass)
                         
@@ -95,9 +109,9 @@ struct RubiksView: View {
                             
                         }) {
                             Image(systemName: "book")
-                                .resizable(resizingMode: .stretch)
+                                .font(.system(size: 25))
                                 .padding(10)
-                                .frame(width: 50, height: 50)
+
                         }
                         .buttonStyle(.glass)
                     }
@@ -146,16 +160,9 @@ struct RubiksView: View {
             if bothDown {
                 finalTime = Date().timeIntervalSince(startTime)
                 currentState = .finished
-                let newResult = RubiksResult(rubiksTime: finalTime, date: Date())
-                
-                history.insert(newResult, at: 0)
-                // at: 0 means it puts it at the start of the array
-
-                
+                // for haptic feedback
                 UIImpactFeedbackGenerator(style: .medium)
                     .impactOccurred()
-                // for haptic feedback
-                
             }
             
         case .finished:
@@ -177,7 +184,7 @@ struct RubiksView: View {
     
     private var timerTextColor: Color {
         if currentState == .ready { return .yellow }
-        if currentState == .finished { return .red }
+        if currentState == .finished { return .black }
         return .primary
     }
     
@@ -214,6 +221,7 @@ struct SensorView: View {
                             .onEnded { _ in isPressed = false }
                     )
                     .animation(.tightUpper, value: isPressed)
+                    
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             
