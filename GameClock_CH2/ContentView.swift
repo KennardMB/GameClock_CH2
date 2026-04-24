@@ -13,7 +13,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack (spacing: 50) {
                 Picker("Clock Type", selection: $selection) {
                     ForEach(options, id: \.self) { option in
                         Text(option).tag(option)
@@ -27,10 +27,11 @@ struct ContentView: View {
                 } else {
                     TimerView()
                 }
+                
 
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Games")
-                        .font(.caption)
+                        .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
@@ -39,24 +40,25 @@ struct ContentView: View {
                         NavigationLink {
                             RubiksView()
                         } label: {
-                            VStack(spacing: 10) {
+                            HStack(spacing: 10) {
                                 Image(systemName: "cube.fill")
                                     .font(.system(size: 44))
                                     .symbolRenderingMode(.hierarchical)
                                 Text("Rubik's")
                                     .font(.headline)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(.orange)
                             }
                             .frame(maxWidth: .infinity, minHeight: 50)
+                            .padding(18)
                         }
                         .buttonStyle(.bordered)
-                        .tint(.blue)
+                        .tint(.yellow)
                         .glassEffect()
 
                         NavigationLink {
                             ChessView()
                         } label: {
-                            VStack(spacing: 10) {
+                            HStack(spacing: 10) {
                                 Image(systemName: "crown.fill")
                                     .font(.system(size: 44))
                                     .symbolRenderingMode(.hierarchical)
@@ -75,7 +77,7 @@ struct ContentView: View {
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .navigationTitle("Game Clock")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }

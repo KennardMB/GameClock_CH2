@@ -19,7 +19,7 @@ struct TimerView: View {
             if isRunning {
                 // Large Countdown Text
                 Text(formatTime(duration))
-                    .font(.system(size: 80, weight: .thin))
+                    .font(.system(size: 100, weight: .thin))
                     .transition(.opacity) // Smooth swap
             } else {
                 // Two-Column Picker

@@ -21,7 +21,7 @@ struct StopwatchView: View {
     var body: some View {
         VStack {
             Text(displayTime)
-                .font(.system(size: 64))
+                .font(.system(size: 100))
                 .fontWeight(.thin)
                 .padding()
             

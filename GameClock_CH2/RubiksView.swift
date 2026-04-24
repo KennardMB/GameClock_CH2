@@ -184,7 +184,7 @@ struct RubiksView: View {
     
     private var timerTextColor: Color {
         if currentState == .ready { return .yellow }
-        if currentState == .finished { return .black }
+        if currentState == .finished { return .primary }
         return .primary
     }
     
