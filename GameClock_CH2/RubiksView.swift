@@ -33,32 +33,42 @@ struct RubiksView: View {
             TimelineView(.animation(minimumInterval: 0.01, paused: currentState != .running)) { context in
                 
                 ZStack {
-                    HStack(spacing: 0) {
-                        // Left Palm
-                        SensorView(isPressed: $leftPressed, color: sensorColor)
-                            .frame (width: 400)
-                            .scaleEffect(x: -1, y: 1)
+                    GeometryReader { geometry in
+                        HStack(spacing: 170) {
+                            // Left Finger
+                            SensorView(isPressed: $leftPressed, color: sensorColor)
+                                .scaleEffect(x: -1, y: 1)
                             
-                        Spacer()
-                        
-                        // Right Palm
-                        SensorView(isPressed: $rightPressed, color: sensorColor)
-                            .frame (width: 400)
-                        
                             
+                            // Right Finger
+                            SensorView(isPressed: $rightPressed, color: sensorColor)
+                            
+                            
+                        }
+                        .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                        
                     }
                     // Center Display
                     VStack(spacing: 20) {
                         let currentDisplayTime = (currentState == .running) ? context.date.timeIntervalSince(startTime) : finalTime
                         
-                        Text(formatTime(currentDisplayTime))
-                            .font(.system(size: 80, weight: .bold, design: .monospaced))
-                            .foregroundColor(timerTextColor)
+                        
+                        if currentState == .finished || (currentState == .idle && finalTime > 0)  {
+                            Text(formatTime(currentDisplayTime))
+                                .font(.system(size: 100, weight: .bold, design: .monospaced))
+                                .foregroundColor(timerTextColor)
+                        } else {
+                            Text(formatTime(currentDisplayTime))
+                                .font(.system(size: 80, weight: .light, design: .monospaced))
+                                .foregroundColor(timerTextColor)
+                        }
+                        
                         
                         Text(statusMessage)
                             .font(.headline)
                             .foregroundColor(.secondary)
                     }
+                    .allowsHitTesting(false)
                     
                 }
             }
@@ -190,18 +200,25 @@ struct SensorView: View {
     var color: Color
     
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(isPressed ? color : color.opacity(0.15))
-                .frame(width: 800)
-                .edgesIgnoringSafeArea(.all)
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { _ in if !isPressed { isPressed = true } }
-                        .onEnded { _ in isPressed = false }
-                )
-                .animation(.tightUpper, value: isPressed)
+        GeometryReader { geometry in
+            let hugeSize = geometry.size.width * 1.4
+            
+            ZStack{
+                Circle()
+                    .fill(isPressed ? color : color.opacity(0.15))
+                    .frame(width: hugeSize, height: hugeSize)
+                    .edgesIgnoringSafeArea(.all)
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { _ in if !isPressed { isPressed = true } }
+                            .onEnded { _ in isPressed = false }
+                    )
+                    .animation(.tightUpper, value: isPressed)
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            
         }
+        
     }
 }
 
