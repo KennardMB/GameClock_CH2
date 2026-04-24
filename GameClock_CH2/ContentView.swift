@@ -22,11 +22,14 @@ struct ContentView: View {
                 .pickerStyle(.segmented)  //change the picker to be segmented
                 .padding()
 
-                if selection == "Stopwatch" {
-                    StopwatchView()
-                } else {
-                    TimerView()
+                HStack{
+                    if selection == "Stopwatch" {
+                        StopwatchView()
+                    } else {
+                        TimerView()
+                    }
                 }
+                .frame(width: .infinity, height: 250)
                 
 
                 VStack(alignment: .leading, spacing: 12) {
