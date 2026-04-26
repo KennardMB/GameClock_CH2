@@ -4,7 +4,7 @@
 //
 //  Created by Kennard M on 19/04/26.
 //
-
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
@@ -82,6 +82,7 @@ struct ContentView: View {
             .navigationTitle("Game Clock")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .modelContainer(for: Solve.self)
     }
 }
 

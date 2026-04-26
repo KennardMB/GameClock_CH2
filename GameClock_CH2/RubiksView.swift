@@ -5,9 +5,12 @@
 //  Created by Kennard M on 20/04/26.
 //
 
+import SwiftData
 import SwiftUI
 
 struct RubiksView: View {
+    // For Data (modelcontext here means the "warehouse" of the data)
+    @Environment(\.modelContext) private var modelContext
     
     // Cases
     enum TimerState {
@@ -62,17 +65,17 @@ struct RubiksView: View {
 
                         
                     }
-                    // Center Display
+                    // Center Stopwatch Display
                     VStack(spacing: 20) {
                         let currentDisplayTime = (currentState == .running) ? context.date.timeIntervalSince(startTime) : finalTime
-                        
-                        
+                        // setting condition so we can have animation
                         let condition = currentState == .finished || (currentState == .idle && finalTime > 0)
+                        
                         Text(formatTime(currentDisplayTime))
                             .font(.system(
                                 size: condition ? 100: 80,
-                                weight: condition ? .bold : .light,
-                                design: .monospaced))
+                                weight: condition ? .bold : .light))
+                            .monospacedDigit()
                             .foregroundColor(timerTextColor)
                         // if the condition is satisfied then it uses the animation
                             .animation(condition ? .spring(response:0.1, dampingFraction: 0.9) : .none)
@@ -158,11 +161,16 @@ struct RubiksView: View {
             
         case .running:
             if bothDown {
-                finalTime = Date().timeIntervalSince(startTime)
+                let recordedTime = Date().timeIntervalSince(startTime)
+                finalTime = recordedTime
                 currentState = .finished
                 // for haptic feedback
                 UIImpactFeedbackGenerator(style: .medium)
                     .impactOccurred()
+                
+                //save to history
+                let newSolve = Solve(solveTime: recordedTime)
+                        modelContext.insert(newSolve)
             }
             
         case .finished:

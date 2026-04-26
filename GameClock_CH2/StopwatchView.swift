@@ -11,7 +11,7 @@ struct StopwatchView: View {
     
     @State private var startTime = Date()
     @State private var finalTime: TimeInterval = 0
-    @State private var displayTime: String = "00.00.00"
+    @State private var displayTime: String = "00.00,00"
     @State private var isRunning: Bool = false
     @State private var timer: Timer? = nil
     
@@ -21,8 +21,11 @@ struct StopwatchView: View {
     var body: some View {
         VStack {
             Text(displayTime)
-                .font(.system(size: 100))
+                .multilineTextAlignment(.center)
+                .monospacedDigit()
+                .font(.system(size: 80))
                 .fontWeight(.thin)
+                .frame(height: 200)
                 .padding()
             
             HStack (spacing: 100){
@@ -35,8 +38,8 @@ struct StopwatchView: View {
                 }) {
                     Image(systemName: isRunning ? "pause" : "play.fill")
                 }
-                .frame(width: 50, height: 50)
-                .padding()
+                .font(.system(size: 24, weight: .bold))
+                .frame(width: 100, height: 100)
                 .background(isRunning ? .red : .green)
                 .foregroundStyle(.white)
                 .clipShape(Circle())
@@ -46,8 +49,8 @@ struct StopwatchView: View {
                 }) {
                     Image(systemName: "arrow.trianglehead.counterclockwise")
                 }
-                .frame(width: 50, height: 50)
-                .padding()
+                .font(.system(size: 24, weight: .bold))
+                .frame(width: 100, height: 100)
                 .background(.blue)
                 .foregroundStyle(.white)
                 .clipShape(Circle())
@@ -58,7 +61,6 @@ struct StopwatchView: View {
     func start() {
             startTime = Date()
             isRunning = true
-
             timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
                 formatTime()
             }
@@ -66,7 +68,6 @@ struct StopwatchView: View {
 
         func pause() {
             finalTime += Date().timeIntervalSince(startTime)
-            
             timer?.invalidate()
             isRunning = false
         }
@@ -75,7 +76,7 @@ struct StopwatchView: View {
             timer?.invalidate()
             finalTime = 0
             isRunning = false
-            displayTime = "00:00.00"
+            formatTime()
         }
 
         func formatTime() {
@@ -85,7 +86,7 @@ struct StopwatchView: View {
             let seconds = Int(totalElapsed) % 60
             let tenths = Int((totalElapsed * 100).truncatingRemainder(dividingBy: 100))
             
-            displayTime = String(format: "%02d:%02d.%02d", minutes, seconds, tenths)
+            displayTime = String(format: "%02d.%02d,%02d", minutes, seconds, tenths)
         }
 
 }

@@ -19,7 +19,9 @@ struct TimerView: View {
             if isRunning {
                 // Large Countdown Text
                 Text(formatTime(duration))
-                    .font(.system(size: 100, weight: .thin))
+                    .font(.system(size: 80, weight: .thin))
+                    .monospacedDigit()
+                    .frame(height: 200)
                     .transition(.opacity) // Smooth swap
             } else {
                 // Two-Column Picker
@@ -28,25 +30,26 @@ struct TimerView: View {
             }
             
             // Buttons Row
-            HStack(spacing: 40) {
+            HStack(spacing: 100) {
                 
                 // START BUTTON
                 Button(action: startTimer) {
                     Text(isRunning ? "Running" : "Start")
                         .font(.system(size: 16, weight: .bold))
-                        .frame(width: 80, height: 80)
+                        .frame(width: 100, height: 100)
                         .background(isRunning || duration == 0 ? Color.gray : Color.green)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .clipShape(Circle())
+                        .opacity(duration == 0 ? 0.5 : 1.0)
                 }
                 .disabled(isRunning || duration <= 0)
                 
                 // STOP / RESET BUTTON
                 Button(action: stopTimer) {
-                    Text("Stop")
+                    Text(isRunning ? "Stop" : "Reset")
                         .font(.system(size: 16, weight: .bold))
-                        .frame(width: 80, height: 80)
-                        .background(Color.red)
+                        .frame(width: 100, height: 100)
+                        .background(isRunning ? Color.red : Color.blue)
                         .foregroundColor(.white)
                         .clipShape(Circle())
                         .opacity(duration == 0 ? 0.5 : 1.0)
