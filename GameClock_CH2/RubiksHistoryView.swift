@@ -13,7 +13,7 @@ struct SolveListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var solves: [Solve]
     
-    // This initializer dynamically filters the Query based on the picker
+    // to filter the Query based on the picker
     init(filterFavorites: Bool) {
         if filterFavorites {
             _solves = Query(filter: #Predicate<Solve> { $0.isFavorite },
@@ -49,6 +49,7 @@ struct SolveListView: View {
                 .onDelete(perform: deleteSolves)
             }
         }
+        .scrollContentBackground(.hidden)
     }
     
     private func deleteSolves(offsets: IndexSet) {
@@ -67,33 +68,38 @@ struct HistorySheetView: View{
     
     var body: some View {
         NavigationStack{
-            VStack {
-                Picker("Filter", selection: $selectedTab) {
-                    Text("All Solves").tag(0)
-                    Text("Favorites").tag(1)
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                VStack {
+                    VStack {
+                        Picker("Filter", selection: $selectedTab) {
+                            Text("All Solves").tag(0)
+                            Text("Favorites").tag(1)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                    }
+                    
+                    if selectedTab == 0 {
+                        SolveListView(filterFavorites: false)
+                    } else {
+                        SolveListView(filterFavorites: true)
+                    }
                 }
-                .pickerStyle(.segmented)
-                .offset(y: 10)
-                .padding()
-            }
-            .padding()
-            .background(Color(.systemGroupedBackground))
-            
-            if selectedTab == 0 {
-                SolveListView(filterFavorites: false)
-            } else {
-                SolveListView(filterFavorites: true)
+                .navigationTitle(selectedTab == 0 ? "History" : "Favorites")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing){
+                        Button("Done") {
+                            dismiss()
+                        }
+                    }
+                }
             }
         }
-        .navigationTitle(selectedTab == 0 ? "History" : "Favorites")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing){
-                Button("Done") {
-                    dismiss()
-                }
-            }
-        }
+        
         
     }
 }
