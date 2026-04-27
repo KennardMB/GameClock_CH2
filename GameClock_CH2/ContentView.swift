@@ -83,6 +83,13 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .modelContainer(for: Solve.self)
+        .onAppear {
+            AppDelegate.orientationLock = .portrait
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                scene.keyWindow?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
+            }
+        }
     }
 }
 
