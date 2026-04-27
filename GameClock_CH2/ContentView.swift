@@ -13,33 +13,31 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            VStack (spacing: 50) {
-                Picker("Clock Type", selection: $selection) {
-                    ForEach(options, id: \.self) { option in
-                        Text(option).tag(option)
+                VStack(spacing: 50) {
+                    Picker("Clock Type", selection: $selection) {
+                        ForEach(options, id: \.self) { option in
+                            Text(option).tag(option)
+                        }
                     }
-                }
-                .pickerStyle(.segmented)  //change the picker to be segmented
-                .padding()
+                    .pickerStyle(.segmented)  //change the picker to be segmented
+                    .padding()
 
-                HStack{
-                    if selection == "Stopwatch" {
-                        StopwatchView()
-                    } else {
-                        TimerView()
+                    Group {
+                        if selection == "Stopwatch" {
+                            StopwatchView()
+                        } else {
+                            TimerView()
+                        }
                     }
-                }
-                .frame(width: .infinity, height: 250)
-                
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Games")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                        .padding(.horizontal, 4)
-                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Games")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
+                            .padding(.horizontal, 4)
+
                         NavigationLink {
                             RubiksView()
                         } label: {
@@ -74,11 +72,11 @@ struct ContentView: View {
                         .buttonStyle(.bordered)
                         .tint(.purple)
                         .glassEffect()
-                    
+                    }
+                    .padding()
                 }
-                .padding()
-            }
-            .frame(maxHeight: .infinity, alignment: .top)
+                .frame(maxWidth: .infinity, alignment: .top)
+            
             .navigationTitle("Game Clock")
             .navigationBarTitleDisplayMode(.inline)
         }
