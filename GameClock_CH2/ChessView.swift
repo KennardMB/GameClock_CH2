@@ -169,12 +169,14 @@ struct ChessView: View {
         .onAppear {
             AppDelegate.orientationLock = .landscapeRight
             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                scene.keyWindow?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                 scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
             }
         }
         .onDisappear {
             AppDelegate.orientationLock = .portrait
             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                scene.keyWindow?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                 scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
             }
         }

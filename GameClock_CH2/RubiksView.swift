@@ -127,6 +127,7 @@ struct RubiksView: View {
         .onAppear {
             AppDelegate.orientationLock = .landscapeRight
             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                scene.keyWindow?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                 scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
                 UIApplication.shared.isIdleTimerDisabled = true
             }
@@ -135,6 +136,7 @@ struct RubiksView: View {
         .onDisappear {
             AppDelegate.orientationLock = .portrait
             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                scene.keyWindow?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                 scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait))
                 UIApplication.shared.isIdleTimerDisabled = false
             }
