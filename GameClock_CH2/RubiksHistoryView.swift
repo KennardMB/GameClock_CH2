@@ -6,71 +6,119 @@
 //
 import SwiftData
 import SwiftUI
+import Foundation
 
-
-
+// THE LIST ITSELF
 struct SolveListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var solves: [Solve]
-
-    init(showOnlyFavorites: Bool) {
-        if showOnlyFavorites {
+    
+    // This initializer dynamically filters the Query based on the picker
+    init(filterFavorites: Bool) {
+        if filterFavorites {
             _solves = Query(filter: #Predicate<Solve> { $0.isFavorite },
                             sort: \Solve.date, order: .reverse)
         } else {
             _solves = Query(sort: \Solve.date, order: .reverse)
         }
     }
-
+    
     var body: some View {
-//        List {
-//            // Ensure NO '$' here
-//            ForEach(solves) { solve in
-//                HStack {
-//                    VStack(alignment: .leading) {
-//                        // Ensure NO '$' here
-//                        Text(solve.formatTime)
-//                            .font(.system(.title3, design: .monospaced))
-//                        Text(solve.date.formatted(date: .abbreviated, time: .shortened))
-//                            .font(.caption).foregroundStyle(.secondary)
-//                    }
-//                    Spacer()
-//                    Button {
-//                        solve.isFavorite.toggle()
-//                    } label: {
-//                        Image(systemName: solve.isFavorite ? "star.fill" : "star")
-//                            .foregroundStyle(.yellow)
-//                    }
-//                    .buttonStyle(.plain)
-//                }
-//            }
-//            .onDelete(perform: deleteItems)
-//        }
+        List {
+            if solves.isEmpty {
+                ContentUnavailableView("No Solves Found", systemImage: "clock.badge.questionmark")
+            }
+            else {
+                ForEach(solves) { solve in
+                    HStack{
+                        VStack(alignment: .leading) {
+                            Text(solve.formattedTime)
+                                .font(.system(.title2))
+                                .bold()
+                            Text(solve.date.formatted(date: .abbreviated, time: .shortened))
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button { solve.isFavorite.toggle()} label: {
+                            Image(systemName: solve.isFavorite ? "star.fill" : "star")
+                                .foregroundStyle(.yellow)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .onDelete(perform: deleteSolves)
+            }
+        }
     }
     
-    private func deleteItems(offsets: IndexSet) {
+    private func deleteSolves(offsets: IndexSet) {
         for index in offsets {
             modelContext.delete(solves[index])
         }
     }
-    
-    private func formatTime(_ seconds: Double) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        let hunds = Int((seconds.truncatingRemainder(dividingBy: 1)) * 100)
-        return String(format: "%02d:%02d.%02d", mins, secs, hunds)
-    }
-
 }
 
+// THE HISTORY VIEW (INCLUDING FAV)
 struct HistorySheetView: View{
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    //default segmented picker (0 = history view, 1 favorites view)
     @State private var selectedTab = 0
     
     var body: some View {
+        NavigationStack{
+            VStack {
+                Picker("Filter", selection: $selectedTab) {
+                    Text("All Solves").tag(0)
+                    Text("Favorites").tag(1)
+                }
+                .pickerStyle(.segmented)
+                .offset(y: 10)
+                .padding()
+            }
+            .padding()
+            .background(Color(.systemGroupedBackground))
+            
+            if selectedTab == 0 {
+                SolveListView(filterFavorites: false)
+            } else {
+                SolveListView(filterFavorites: true)
+            }
+        }
+        .navigationTitle(selectedTab == 0 ? "History" : "Favorites")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing){
+                Button("Done") {
+                    dismiss()
+                }
+            }
+        }
         
     }
 }
-#Preview (traits: .landscapeRight) {
-    HistorySheetView()
-}
 
+
+#Preview {
+    let container: ModelContainer = {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(for: Solve.self, configurations: config)
+        
+        // Add dummy data to the main context
+        let sampleData = [
+            Solve(solveTime: 12.45, isFavorite: true),
+            Solve(solveTime: 9.99, isFavorite: false),
+            Solve(solveTime: 15.20, isFavorite: true)
+        ]
+        
+        for solve in sampleData {
+            container.mainContext.insert(solve)
+        }
+        
+        return container
+    }() // This () executes the logic and returns the container
+
+    // No 'return' keyword here—just the view!
+    HistorySheetView()
+        .modelContainer(container)
+}

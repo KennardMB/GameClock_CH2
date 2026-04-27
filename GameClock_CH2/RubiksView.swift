@@ -26,6 +26,9 @@ struct RubiksView: View {
     @State private var startTime = Date()
     @State private var finalTime: TimeInterval = 0
     
+    // For History Button Sheet
+    @State private var showingHistory = false
+    
     
     
     var body: some View {
@@ -109,7 +112,7 @@ struct RubiksView: View {
                         .buttonStyle(.glass)
                         
                         Button(action: {
-                            
+                            showingHistory = true
                         }) {
                             Image(systemName: "book")
                                 .font(.system(size: 25))
@@ -117,6 +120,12 @@ struct RubiksView: View {
 
                         }
                         .buttonStyle(.glass)
+                        .sheet(isPresented: $showingHistory){
+                            HistorySheetView()
+                                .presentationDetents([.medium, .large])
+                                .presentationDragIndicator(.visible)
+                        }
+                        
                     }
                     .offset(y: geometry.size.height * 0.4)
                     .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
